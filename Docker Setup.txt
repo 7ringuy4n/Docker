@@ -1,0 +1,294 @@
+**********Set up the repository*****************
+sudo apt-get update
+sudo apt-get install \
+   ca-certificates \
+   curl \
+   gnupg \
+   apt-transport-https \
+   software-properties-common
+   
+**********Add Docker’s official GPG key*****************
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+**********Use the following command to set up the repository:*****************
+echo \
+ "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+ "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+ sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+**********Install Docker Engine*****************
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+sudo systemctl enable docker.service
+sudo systemctl enable containerd.service
+ 
+#For the desired version
+VERSION_STRING=5:20.10.13~3-0~ubuntu-jammy
+sudo apt-get install docker-ce=$VERSION_STRING docker-ce-cli=$VERSION_STRING containerd.io docker-buildx-plugin docker-compose-plugin
+
+**********Verify that the Docker Engine installation*****************
+sudo docker run hello-world
+
+**********Add user to docker group*****************
+sudo usermod -aG docker <user>
+
+**********Docker Image from Docker Hub*****************
+https://hub.docker.com/_/nextcloud
+
+#To pull desired image, for example:
+docker pull nginx:mainline-alpine-perl
+
+**********Docker CLI*****************
+#https://docs.docker.com/engine/reference/commandline
+#Docker CLI - Tagging
+name:tag -> myimage:v1
+repository/name:tag -> myacr.vnsec.io/myimage:v1
+
+docker images #Check current image
+docker ps -a
+docker exec -it <container-name> bash
+docker start <container-name>
+docker stop <container-name>
+docker rm <container-name> #Remove container
+docker rm $(docker ps - -q) #Remove all stopped containers
+docker rmi <image-name> #Remove Image
+docker system prune -a # Remove all images not in use by any containers
+docker inspect <container-name> //check container config
+docker inspect -f "{{ .HostConfig.Links }}" <container-name> //inspect a part of config
+docker build -t <name:tag> . #Build Docker image using Dockerfile located in the same folder
+docker build -t <name:tag> -f <path> #Build Docker image using Dockerfile located in the different folder
+docker tag <image-name> <name:tag> #Tag an existing image
+docker create volume <volume-name>
+docker volume ls <volume-name>
+docker volume inspect <volume-name>
+docker volume rm <volume-name>
+docker volume prune <volume-name> #Delete all volume not mounted
+docker exec -it <container-name> bash #connect to container
+
+#Link Container
+https://docs.docker.com/network/links/
+//Where name is the name of the container we’re linking to and alias is an alias for the link name. 
+//That alias is used shortly. The --link flag also takes the form
+//Docker sets an <alias>_NAME environment variable for each target container listed in the --link parameter. 
+//For example, if a new container called web is linked to a database container called db via --link db:webdb, 
+//then Docker creates a WEBDB_NAME=/web/webdb variable in the web container.
+docker run --link <container-name>:alias or docker run --link <container-name>
+
+*Link Multiple Container
+docker inspect -f "{{ .HostConfig.Links }}" <container-name> (inspect a part of config)
+           "Links": [
+                "/mysql:/nextcloud01/mysql",
+                "/redis01:/nextcloud01/redis01"
+            ],
+
+*For example: add more option to current container
+docker update --restart=always [container id or container name]
+
+*Images store at location:
+/var/lib/docker/volumes/
+
+*Configuration store at location:
+/var/lib/docker/containers
+
+***For Example:
+docker pull nextcloud
+docker pull mysql:5.7.42
+docker pull redis
+docker run --name mysql -p 33060:3306 --restart=always -e MYSQL_ROOT_HOST=% -e MYSQL_ROOT_PASSWORD=Seal0fwind -d mysql:5.7.42
+docker run --name redis01 --restart=always -p 6379:6379 -d redis redis-server --save 60 1 --loglevel warning
+docker run --name nextcloud01 --restart=always --link mysql:mysql --link redis01:redis01 -d -p 8083:80 nextcloud
+
+
+*Login to mysql
+sudo docker exec -it mysql /bin/bash
+mysql -u root -p
+CREATE DATABASE nextcloud;
+CREATE USER 'nextcloud'@'%' IDENTIFIED WITH mysql_native_password BY 'Seal0fwind';
+GRANT ALL PRIVILEGES ON nextcloud.* TO 'nextcloud'@'%';
+FLUSH PRIVILEGES;
+ 
+***Connect with redis-cli
+docker exec -it redis01 redis-cli
+redis-cli -s /var/run/redis/redis.sock MONITOR
+MONITOR (monitor what is running)
+
+
+**********Building DockerFile/Image*****************
+#Make webzip.gz from free website template
+#Make DockerFile/Image*****************
+nano Dockerfile
+
+FROM ubuntu
+ENV DEBIAN_FRONTEND=noninteractive
+ENV APACHE_RUN_USER www-data
+ENV APACHE_RUN_GROUP www-data
+ENV APACHE_LOG_DIR /var/log/apache2
+RUN apt update 
+RUN apt-get install -y git
+RUN apt-get install -y apache2
+CMD ["/usr/sbin/apache2ctl", "-D", "FOREGROUND"]
+EXPOSE 80
+WORKDIR /var/www/html/webtest
+VOLUME /var/log/apache2
+COPY web /var/www/html/webtest
+
+docker build -t webziptest:v1 .
+
+*Check recent built images
+docker images
+
+*Run image
+docker run --name webzip -d -p 8083:80 <image-name>:<TAG>
+docker run -d --name webzip02 -p 8083:80 webziptest:v1
+
+**********Docker Compose*****************
+curl -SL https://github.com/docker/compose/releases/download/v2.17.2/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose
+sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+
+mkdir composetest && cd composetest
+*****
+nano app.py
+
+import time
+
+import redis
+from flask import Flask
+
+app = Flask(__name__)
+cache = redis.Redis(host='redis', port=6379)
+
+def get_hit_count():
+    retries = 5
+    while True:
+        try:
+            return cache.incr('hits')
+        except redis.exceptions.ConnectionError as exc:
+            if retries == 0:
+                raise exc
+            retries -= 1
+            time.sleep(0.5)
+
+@app.route('/')
+def hello():
+    count = get_hit_count()
+    return 'Hello World! I have been seen {} times.\n'.format(count)
+
+***
+nano requirements.txt
+
+flask
+redis
+
+***
+nano Dockerfile
+
+# syntax=docker/dockerfile:1
+FROM python:3.7-alpine
+WORKDIR /code
+ENV FLASK_APP=app.py
+ENV FLASK_RUN_HOST=0.0.0.0
+RUN apk add --no-cache gcc musl-dev linux-headers
+COPY requirements.txt requirements.txt
+RUN pip install -r requirements.txt
+EXPOSE 5000
+COPY . .
+CMD ["flask", "run"]
+
+***
+nano docker-compose.yml
+
+version: "3.9"
+services:
+  web: #
+    build: .
+    ports:
+      - "8000:5000"
+  redis:
+    image: "redis:alpine"
+
+**********Docker compose CLI*****************
+docker compose up #to build and start
+docker compose up -d #to build and start in background
+docker compose ps #to check what running
+docker compose stop #to  stop your services background
+docker compose down #to stop testing
+docker compose down --volumes #remove the data volume used by container
+docker compose logs #Get logs
+docker compose logs -f web #Get logs of service web in docker-compose.yml
+docker compose exec <container name> bash #Run commands in container
+docker compose --project-name test01 up -d #run an instance as a project
+docker compose -p test02 up -d #deplay a second version using a different project name (edit port and content of yml file first)
+docker compose -p down #stop second version of project
+docker compose cp <container-id>:<src path> <dest path> #copy files from the container
+docker compose cp <src path> <container-id>:<dest path> #copy files to the container
+
+***
+Go to
+http://<IP>:8000
+
+***
+To update docker compose YAML
+Edit docker-compose.yml
+docker compose up // to rebuild
+
+**********Docker Volume*****************
+docker volume create myvolume01
+docker run -d --name myvolume -v myvol:/app nginx:lasted #-v: mapping the volume to a logical folder
+docker run -d --name myvolume -v d:/app nginx:lasted #-v: #specify a local folder in configuration file ("Mounsts": "Source" : "path",)
+
+
+
+
+
+**********Add Docker’s official GPG key:*****************
+
+
+docker run --restart=always --name my_daemonized -d ubuntu /bin/sh -c "while true; do echo my daemonized container; sleep 1; done"
+
+This is how you can edit an existing docker container config:
+
+stop container:
+docker stop <container name>
+
+edit config:
+docker run -it -v /var/lib/docker:/var/lib/docker alpine vi $(docker inspect --format='/var/lib/docker/containers/{{.Id}}/config.v2.json' <container name>)
+
+restart docker
+
+
+
+
+
+tar czvf compress
+tar xzvf --directory /tmp
+
+
+
+
+***
+nano Dockerfile
+
+FROM python:3.7-alpine
+WORKDIR /code
+ADD app.py requirements.txt code/
+RUN pip install -r requirements.txt
+CMD ["python", "app.py"]
+
+***
+nano docker-compose.yml
+
+version: "3.9"
+services:
+  web-fe:
+    build: .
+    command: python app.py
+    ports:
+      - "8000:5000"
+  redis:
+    image: "redis:alpine"
+    port:
+        - 6379

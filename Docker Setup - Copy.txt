@@ -1,0 +1,139 @@
+**********Set up the repository*****************
+sudo apt-get update
+sudo apt-get install \
+   ca-certificates \
+   curl \
+   gnupg \
+   apt-transport-https \
+   software-properties-common
+   
+**********Add Docker’s official GPG key*****************
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+**********Use the following command to set up the repository:*****************
+echo \
+ "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+ "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+ sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+**********Install Docker Engine*****************
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+sudo systemctl enable docker.service
+sudo systemctl enable containerd.service
+ 
+*For the desired version
+VERSION_STRING=5:20.10.13~3-0~ubuntu-jammy
+sudo apt-get install docker-ce=$VERSION_STRING docker-ce-cli=$VERSION_STRING containerd.io docker-buildx-plugin docker-compose-plugin
+
+**********Verify that the Docker Engine installation*****************
+sudo docker run hello-world
+
+**********Add user to docker group*****************
+sudo usermod -aG docker <user>
+
+**********Docker CLI*****************
+https://docs.docker.com/engine/reference/commandline
+
+**********Docker Image from Docker Hub*****************
+https://hub.docker.com/_/nextcloud
+
+*To pull desired image, for example:
+docker pull nginx:mainline-alpine-perl
+
+*Check current image:
+docker images
+
+docker ps -a
+docker exec -it <container-name> bash
+docker start <container-name>
+docker stop <container-name>
+docker rm <container-name>
+docker inspect <container-name> //check container config
+docker inspect -f "{{ .HostConfig.Links }}" <container-name> //inspect a part of config
+
+*Link Container
+https://docs.docker.com/network/links/
+//Where name is the name of the container we’re linking to and alias is an alias for the link name. 
+//That alias is used shortly. The --link flag also takes the form
+//Docker sets an <alias>_NAME environment variable for each target container listed in the --link parameter. 
+//For example, if a new container called web is linked to a database container called db via --link db:webdb, 
+//then Docker creates a WEBDB_NAME=/web/webdb variable in the web container.
+docker run --link <container-name>:alias or docker run --link <container-name>
+
+*Link Multiple Container
+docker inspect -f "{{ .HostConfig.Links }}" <container-name> (inspect a part of config)
+           "Links": [
+                "/mysql:/nextcloud01/mysql",
+                "/redis01:/nextcloud01/redis01"
+            ],
+
+*For example: add more option to current container
+docker update --restart=always [container id or container name]
+
+*Images store at location:
+/var/lib/docker/volumes/
+
+*Configuration store at location:
+/var/lib/docker/containers
+
+***For Example:
+docker pull nextcloud
+docker pull mysql:5.7.42
+docker pull redis
+docker run --name mysql -p 33060:3306 --restart=always -e MYSQL_ROOT_HOST=% -e MYSQL_DATABASE=nextcloud -e MYSQL_ROOT_PASSWORD=Seal0fwind -d mysql:5.7.42
+docker run --name redis01 --restart=always -p 6379:6379 -d redis redis-server --save 60 1 --loglevel warning
+docker run --name nextcloud01 --restart=always --link mysql:mysql --link redis01:redis01 -d -p 8080:80 nextcloud
+
+
+*Login to mysql
+sudo docker exec -it mysql /bin/bash
+mysql -u root -p
+CREATE DATABASE nextcloud;
+CREATE USER 'nextcloud'@'%' IDENTIFIED WITH mysql_native_password BY 'Seal0fwind';
+GRANT ALL PRIVILEGES ON nextcloud.* TO 'nextcloud'@'%';
+FLUSH PRIVILEGES;
+ 
+***Connect with redis-cli
+docker exec -it redis01 redis-cli
+redis-cli -s /var/run/redis/redis.sock MONITOR
+MONITOR (monitor what is running)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+**********Add Docker’s official GPG key:*****************
+**********Add Docker’s official GPG key:*****************
+
+
+docker run --restart=always --name my_daemonized -d ubuntu /bin/sh -c "while true; do echo my daemonized container; sleep 1; done"
+
+This is how you can edit an existing docker container config:
+
+stop container:
+docker stop <container name>
+
+edit config:
+docker run -it -v /var/lib/docker:/var/lib/docker alpine vi $(docker inspect --format='/var/lib/docker/containers/{{.Id}}/config.v2.json' <container name>)
+
+restart docker
