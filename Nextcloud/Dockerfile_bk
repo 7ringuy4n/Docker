@@ -1,0 +1,2 @@
+FROM ubuntu
+COPY db_script db_script
