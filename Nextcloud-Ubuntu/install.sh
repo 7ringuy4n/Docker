@@ -29,7 +29,7 @@ apt-get install -y \
    gnupg \
    apt-transport-https \
    software-properties-common
-apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+apt-get install -y containerd.io docker-buildx-plugin docker-compose-plugin
 systemctl enable docker.service
 systemctl enable containerd.service
 VERSION_STRING=5:20.10.13~3-0~ubuntu-jammy
