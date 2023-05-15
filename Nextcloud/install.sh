@@ -24,5 +24,5 @@ VERSION_STRING=5:20.10.13~3-0~ubuntu-jammy
 apt-get install -y docker-ce=$VERSION_STRING docker-ce-cli=$VERSION_STRING containerd.io docker-buildx-plugin docker-compose-plugin
 usermod -aG docker tringuyen
 chmod 666 /var/run/docker.sock
-systemctl status docker.service
+#systemctl status docker.service
 docker compose up -d
