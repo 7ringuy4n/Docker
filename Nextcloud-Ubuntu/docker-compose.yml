@@ -6,8 +6,8 @@ volumes:
 
 services:
   db:
-    container_name: mysql_v5.7.42
-    image: mysql:5.7.42
+    container_name: mysql_v8.0.33
+    image: mysql:8.0.33
     restart: unless-stopped
     ports:
       - '33060:3306'    
