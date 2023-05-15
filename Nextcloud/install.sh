@@ -10,8 +10,6 @@ user=$(whoami)
 #    volumes:
 #      - db:/var/lib/mysql
 #      - ./db_script/grantprivilege.sql:/docker-entrypoint-initdb.d      #<- error
-
-
 #Set up the repository
 apt-get update
 apt-get install -y \
@@ -21,6 +19,8 @@ apt-get install -y \
    apt-transport-https \
    software-properties-common
 #Add Docker’s official GPG key
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 install -m 0755 -d /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 chmod a+r /etc/apt/keyrings/docker.gpg
