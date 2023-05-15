@@ -1,4 +1,17 @@
 user=$(whoami)
+#option to docker-compose
+#services:
+#  db:
+#    container_name: mysql_v5.7.42
+#    image: mysql:5.7.42
+#    restart: unless-stopped
+#    ports:
+#      - '33060:3306'    
+#    volumes:
+#      - db:/var/lib/mysql
+#      - ./db_script/grantprivilege.sql:/docker-entrypoint-initdb.d      #<- error
+
+
 #Set up the repository
 apt-get update
 apt-get install -y \

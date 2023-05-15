@@ -13,7 +13,6 @@ services:
       - '33060:3306'    
     volumes:
       - db:/var/lib/mysql
-      - ./db_script/grantprivilege.sql:/docker-entrypoint-initdb.d
     environment:
       - MYSQL_ROOT_PASSWORD=Bund7zXeVz7YnFknLGcnUjHtk
       - MYSQL_PASSWORD=HFdMe9rn5kf7A8Pqc8v86Pre5
@@ -23,7 +22,6 @@ services:
   redis:
     container_name: redis-nextcloud
     image: "redis:alpine"
-    command: redis-server --save 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81      #<- chua link dc
     ports:
       - "6379:6379"
     volumes:
@@ -44,7 +42,6 @@ services:
       - MYSQL_HOST=db
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - REDIS_PASSWORD=eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81      #<- chua link dc
     depends_on:
       - db
       - redis
