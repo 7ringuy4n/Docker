@@ -35,4 +35,4 @@ systemctl enable containerd.service
 usermod -aG docker tringuyen
 chmod 666 /var/run/docker.sock
 #systemctl status docker.service
-docker compose up -d
+#docker compose up -d
