@@ -1,0 +1,49 @@
+version: '1'
+
+volumes:
+  nextcloud:
+  db:
+
+services:
+  db:
+    container_name: mysql_v8.0.33
+    image: mysql:8.0.33
+    restart: unless-stopped
+    ports:
+      - '33060:3306'    
+    volumes:
+      - db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=Bund7zXeVz7YnFknLGcnUjHtk
+      - MYSQL_PASSWORD=HFdMe9rn5kf7A8Pqc8v86Pre5
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+
+  redis:
+    container_name: redis-nextcloud
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis/data:/var/lib/redis
+
+  app:
+    container_name: nextcloud
+    image: nextcloud
+    restart: unless-stopped
+    ports:
+      - 8888:80
+    volumes:
+      - nextcloud:/var/www/html
+    environment:
+      - MYSQL_PASSWORD=HFdMe9rn5kf7A8Pqc8v86Pre5
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_HOST=db
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - db
+      - redis
+
+
