@@ -72,6 +72,15 @@ docker volume rm <volume-name>
 docker volume prune <volume-name> #Delete all volume not mounted
 docker exec -it <container-name> bash #connect to container
 
+#Save to tranfer image to another machine
+https://docs.docker.com/engine/reference/commandline/save/
+
+You will need to save the docker image as a tar file: 
+docker save -o <save image to path> <image name>
+
+Then copy the image to your target machine and then run: 
+docker load -i <path to image tar file>
+
 #Link Container
 https://docs.docker.com/network/links/
 //Where name is the name of the container we’re linking to and alias is an alias for the link name. 
