@@ -9,7 +9,7 @@ docker swarm init --advertise-addr <IP Master>
 docker swarm init --advertise-addr 172.16.3.35
 
 #Get join token
-docker swarm join-token <Node_Role>
+docker swarm join-token <ManagerNode>
 docker swarm join-token manager
 
 #Add Worker Node to Master Node
@@ -21,11 +21,12 @@ docker node ls
 
 #Deploy on Master Node
 docker stack deploy -c docker-compose.yml demo-app
+docker stack deploy -c docker-compose.yml nextcloud
 
 #how to check list
 docker service ls
 docker ps
 
 #
-docker service rm $(docker service ls -q) #Remove all Service
+docker service rm $(docker service ls -q) #Remove all Services also containers
 docker rm $(docker ps -q) # Remove all container
