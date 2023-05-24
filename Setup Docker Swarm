@@ -1,0 +1,31 @@
+Master Node
+172.16.3.35
+
+Worker Node
+172.16.3.36
+***************************************************************************************************************************
+#Create Docker Manager - Master Node
+docker swarm init --advertise-addr <IP Master>
+docker swarm init --advertise-addr 172.16.3.35
+
+#Get join token
+docker swarm join-token <Node_Role>
+docker swarm join-token manager
+
+#Add Worker Node to Master Node
+docker swarm join --token <STRING> <IP>:<PORT>
+docker swarm join --token SWMTKN-1-1mpwl02bymlfefovr5gesogq6qizu49dkh0i0hpzfqjwivqxsi-e9ssgmtcprok1n2n628hv4qia 172.16.3.35:2377
+
+#Check Nodes list
+docker node ls
+
+#Deploy on Master Node
+docker stack deploy -c docker-compose.yml demo-app
+
+#how to check list
+docker service ls
+docker ps
+
+#
+docker service rm $(docker service ls -q) #Remove all Service
+docker rm $(docker ps -q) # Remove all container

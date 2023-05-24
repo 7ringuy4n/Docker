@@ -57,7 +57,7 @@ docker exec -it <container-name> bash
 docker start <container-name>
 docker stop <container-name>
 docker rm <container-name> #Remove container
-docker rm $(docker ps - -q) #Remove all stopped containers
+docker rm $(docker ps -q) #Remove all stopped containers
 docker rmi <image-name> #Remove Image
 docker system prune -a # Remove all images not in use by any containers
 docker inspect <container-name> //check container config
