@@ -7,7 +7,7 @@ Node01='172.16.2.44'
 apt-add-repository --yes ppa:ansible/ansible && apt update && apt install -y ansible
 cat <<EOF | tee /etc/ansible/hosts
 [Nodes]
-Node01 ansible_host=$Node01 ansible_port=22 ansible_user=$Nodeuser
+node01 ansible_host=$Node01 ansible_port=22 ansible_user=$Nodeuser
 EOF
 
 sysctl -w net.ipv6.conf.all.disable_ipv6=1
@@ -22,7 +22,7 @@ apt-get install -y \
    gnupg \
    apt-transport-https \
    software-properties-common
-   
+
 install -m 0755 -d /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 chmod a+r /etc/apt/keyrings/docker.gpg
@@ -43,5 +43,5 @@ chown -R $USER:$USER ./script/
 chmod -R 777 ./script/
 docker swarm init --advertise-addr $MasterIP >> ./script/adminconfig.txt
 sed -n '5p' ./script/adminconfig.txt >> ./script/join.sh
-ansible-playbook Setup.yml -l $Node01 --become --ask-become-pass
+ansible-playbook Setup.yml -l node01 --become --ask-become-pass
 #docker stack deploy -c docker-compose.yml nextcloud
