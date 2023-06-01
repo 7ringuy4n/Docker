@@ -1,6 +1,15 @@
 #!/bin/bash
 export MasterIP='172.16.2.43'
 #MasterIP=$(hostname -I)
+export Nodeuser="tringuyen"
+export Node01="172.16.2.44"
+
+apt-add-repository --yes ppa:ansible/ansible && apt update && apt install -y ansible
+cat <<EOF | tee /etc/ansible/hosts
+[Nodes]
+Node01 ansible_host=$Node01 ansible_port=22 ansible_user=$Nodeuser
+EOF
+
 sysctl -w net.ipv6.conf.all.disable_ipv6=1
 sysctl -w net.ipv6.conf.default.disable_ipv6=1
 sysctl -w net.ipv6.conf.lo.disable_ipv6=1
@@ -32,7 +41,7 @@ chmod 666 /var/run/docker.sock
 usermod -aG docker $USER
 chown -R $USER:$USER ./script/
 chmod -R 777 ./script/
-docker swarm init --advertise-addr $MasterIP >> /home/$USER/adminconfig.txt
-sed -n '5p' /home/$USER/adminconfig.txt >> ./script/join.sh
-
-#ansible-playbook Setup.yml -l Nodes --become --ask-become-pass
+docker swarm init --advertise-addr $MasterIP >> ./script/adminconfig.txt
+sed -n '5p' ./script/adminconfig.txt >> ./script/join.sh
+ansible-playbook Setup.yml -l $Node01 --become --ask-become-pass
+docker stack deploy -c docker-compose.yml nextcloud
