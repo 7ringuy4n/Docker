@@ -44,4 +44,5 @@ chmod -R 777 ./script/
 docker swarm init --advertise-addr $MasterIP >> ./script/adminconfig.txt
 sed -n '5p' ./script/adminconfig.txt >> ./script/join.sh
 ansible-playbook Setup.yml -l node01 --become --ask-become-pass
+sleep 30
 docker stack deploy -c docker-compose.yml nextcloud
