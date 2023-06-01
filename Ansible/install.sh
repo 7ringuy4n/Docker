@@ -1,4 +1,11 @@
 #!/bin/bash
+export MasterIP='172.16.2.43'
+#MasterIP=$(hostname -I)
+sysctl -w net.ipv6.conf.all.disable_ipv6=1
+sysctl -w net.ipv6.conf.default.disable_ipv6=1
+sysctl -w net.ipv6.conf.lo.disable_ipv6=1
+sysctl --system
+
 apt-get update
 apt-get install -y \
    ca-certificates \
@@ -23,3 +30,9 @@ systemctl enable docker.service
 systemctl enable containerd.service
 chmod 666 /var/run/docker.sock
 usermod -aG docker $USER
+chown -R $USER:$USER ./script/
+chmod -R 777 ./script/
+docker swarm init --advertise-addr $MasterIP >> /home/$USER/adminconfig.txt
+sed -n '5p' /home/$USER/adminconfig.txt >> ./script/join.sh
+
+#ansible-playbook Setup.yml -l Nodes --become --ask-become-pass

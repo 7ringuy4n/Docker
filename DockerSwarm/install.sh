@@ -1,4 +1,5 @@
 #!/bin/bash
+IP=$(hostname -I)
 apt-get update
 apt-get install -y \
    ca-certificates \
@@ -23,3 +24,4 @@ systemctl enable docker.service
 systemctl enable containerd.service
 chmod 666 /var/run/docker.sock
 usermod -aG docker $USER
+docker swarm init --advertise-addr $IP
