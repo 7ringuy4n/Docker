@@ -1,8 +1,8 @@
 #!/bin/bash
 export MasterIP='172.16.2.43'
 #MasterIP=$(hostname -I)
-export Nodeuser="tringuyen"
-export Node01="172.16.2.44"
+Nodeuser='tringuyen'
+Node01='172.16.2.44'
 
 apt-add-repository --yes ppa:ansible/ansible && apt update && apt install -y ansible
 cat <<EOF | tee /etc/ansible/hosts
@@ -44,4 +44,4 @@ chmod -R 777 ./script/
 docker swarm init --advertise-addr $MasterIP >> ./script/adminconfig.txt
 sed -n '5p' ./script/adminconfig.txt >> ./script/join.sh
 ansible-playbook Setup.yml -l $Node01 --become --ask-become-pass
-docker stack deploy -c docker-compose.yml nextcloud
+#docker stack deploy -c docker-compose.yml nextcloud

@@ -8,3 +8,4 @@ cmd=$(apt-get update && apt-get install -y docker-ce docker-ce-cli containerd.io
 cmd=$(systemctl enable docker.service)
 cmd=$(systemctl enable containerd.service)
 cmd=$(chmod 666 /var/run/docker.sock)
+cmd=$(bash /home/script/join.sh)
