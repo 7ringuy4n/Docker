@@ -1,5 +1,5 @@
 #!/bin/bash
-export MasterIP='172.16.2.43'
+MasterIP='172.16.2.43'
 #MasterIP=$(hostname -I)
 Nodeuser='tringuyen'
 Node01='172.16.2.44'
@@ -43,6 +43,6 @@ chown -R $USER:$USER ./script/
 chmod -R 777 ./script/
 docker swarm init --advertise-addr $MasterIP >> ./script/adminconfig.txt
 sed -n '5p' ./script/adminconfig.txt >> ./script/join.sh
-ansible-playbook Setup.yml -l node01 --become --ask-become-pass
-sleep 30
-docker stack deploy -c docker-compose.yml nextcloud
+
+#ansible-playbook Setup.yml -l node01 --become --ask-become-pass
+#docker stack deploy -c docker-compose.yml nextcloud
